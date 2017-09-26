@@ -9,8 +9,8 @@ use param::Params;
 
 #[derive(Debug)]
 pub struct Context<'r> {
-    pub req: &'r Request,
-    pub resp: Option<Response>,
+    req: &'r Request,
+    resp: Option<Response>,
     params: Option<Params<'r>>,
 }
 
@@ -18,6 +18,10 @@ impl<'r> Context<'r> {
     #[inline]
     pub fn new(req: &'r Request) ->Self {
         Context{req, resp: None, params: None}
+    }
+
+    pub fn response(self) -> Option<Response> {
+        self.resp
     }
 }
 
