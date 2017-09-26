@@ -1,0 +1,12 @@
+[package]
+name = "gin"
+version = "0.1.0"
+authors = ["dongjijin <1186073272@qq.com>"]
+
+[dependencies]
+futures = "0.1.14"
+hyper = "0.11.2"
+
+
+http = "0.1.*"
+
