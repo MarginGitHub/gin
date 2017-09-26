@@ -37,7 +37,7 @@ impl<'p> Params<'p> {
         }
     }
 
-    pub fn get_array(&self, _key: &str) -> Option<&Vec<&str>> {
-        self.inner.get(_key)
+    pub fn get_array(&self, _key: &str) -> Option<&[&str]> {
+        self.inner.get(_key).map(|v| v.as_ref())
     }
 }
