@@ -1,18 +1,23 @@
 use hyper::server::{Request, Response};
+use hyper::StatusCode;
+use hyper::Headers;
+
+use serde::Serialize;
+use serde_json::to_string;
 
 use param::Params;
 
 #[derive(Debug)]
 pub struct Context<'r> {
     pub req: &'r Request,
-    pub resp: &'r mut Response,
+    pub resp: Option<Response>,
     params: Option<Params<'r>>,
 }
 
 impl<'r> Context<'r> {
     #[inline]
-    pub fn new(req: &'r Request, resp: &'r mut Response) ->Self {
-        Context{req, resp, params: None}
+    pub fn new(req: &'r Request) ->Self {
+        Context{req, resp: None, params: None}
     }
 }
 
@@ -46,5 +51,39 @@ impl<'r> Context<'r> {
 
             }
         }
+    }
+}
+
+impl<'r> Context<'r> {
+    pub fn string(&mut self, code: StatusCode, content: String) {
+        let mut headers = Headers::new();
+        headers.set_raw("content_type", "text/plain");
+        let mut resp =Response::new()
+            .with_status(code)
+            .with_headers(headers)
+            .with_body(content);
+        self.resp = Some(resp);
+    }
+
+    pub fn json<T: Serialize>(&mut self, code: StatusCode, obj: &T) {
+        let mut headers = Headers::new();
+        let mut resp =Response::new();
+        match to_string(obj) {
+            Ok(s) => {
+                headers.set_raw("content_type", "application/json");
+                resp = resp.with_status(code)
+                    .with_headers(headers)
+                    .with_body(content);
+            },
+            Err(err) => {
+                headers.set_raw("content_type", "text/plain");
+                resp = resp
+                    .with_status(StatusCode::Ok)
+                    .with_headers(headers)
+                    .with_body(format!("{}", err));
+
+            }
+        }
+        self.resp = Some(resp);
     }
 }

@@ -7,6 +7,10 @@ authors = ["dongjijin <1186073272@qq.com>"]
 futures = "0.1.14"
 hyper = "0.11.2"
 
+serde = "1.0.15"
+serde_json = "1.0.3"
+serde_derive = "1.0.15"
+
 
 http = "0.1.*"
 
