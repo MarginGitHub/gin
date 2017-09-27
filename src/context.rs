@@ -59,13 +59,23 @@ impl<'r> Context<'r> {
 }
 
 impl<'r> Context<'r> {
-    pub fn string(&mut self, code: StatusCode, content: String) {
+    pub fn string(&mut self, content: &str) {
         let mut headers = Headers::new();
         headers.set_raw("content_type", "text/plain");
-        let mut resp =Response::new()
+        let resp =Response::new()
+            .with_status(StatusCode::Ok)
+            .with_headers(headers)
+            .with_body(content.to_string());
+        self.resp = Some(resp);
+    }
+
+    pub fn string_with_code(&mut self, code: StatusCode, content: &str) {
+        let mut headers = Headers::new();
+        headers.set_raw("content_type", "text/plain");
+        let resp =Response::new()
             .with_status(code)
             .with_headers(headers)
-            .with_body(content);
+            .with_body(content.to_string());
         self.resp = Some(resp);
     }
 
@@ -77,7 +87,7 @@ impl<'r> Context<'r> {
                 headers.set_raw("content_type", "application/json");
                 resp = resp.with_status(code)
                     .with_headers(headers)
-                    .with_body(content);
+                    .with_body(s);
             },
             Err(err) => {
                 headers.set_raw("content_type", "text/plain");
