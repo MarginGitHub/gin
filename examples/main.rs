@@ -9,13 +9,6 @@ fn main() {
 }
 
 fn index(c: &mut Context) {
-    match c.get_query("name") {
-        Some(val) => {
-            println!("value: {}", val)
-        },
-        None => {
-            println!("no search")
-        }
-    }
+    println!("{:#?}", c.get_all_query());
     c.string("Hello");
 }

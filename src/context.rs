@@ -27,6 +27,23 @@ impl<'r> Context<'r> {
 
 
 impl<'r> Context<'r> {
+    pub fn get_all_query(&mut self) -> Option<&Params> {
+        match self.params {
+            Some(ref _params) => Some(_params),
+            None => {
+                match self.req.uri().query() {
+                    Some(_query) => {
+                        let params = Params::from(_query);
+                        self.params = Some(params);
+                        self.params.as_ref()
+                    },
+                    None => {
+                        None
+                    }
+                }
+            }
+        }
+    }
     pub fn get_query(&mut self, key: &'r str) -> Option<&str> {
        self.get_query_array(key).map(|_array| {
            match _array.get(0) {
