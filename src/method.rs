@@ -1,4 +1,5 @@
 use context::Context;
+use hyper::StatusCode;
 
 pub type Handler = Fn(&mut Context) + 'static;
 
@@ -18,10 +19,10 @@ pub fn post(_path: &'static str, _handler: Box<Handler>) {
     }
 }
 
-pub fn error(_handler: Box<Handler>) {
+pub fn error(code: StatusCode, _handler: Box<Handler>) {
     unsafe {
         if let Some(_router) = ::ROUTER.as_mut() {
-            _router.set_error(_handler);
+            _router.set_error(code, _handler);
         }
     }
 }

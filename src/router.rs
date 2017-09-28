@@ -9,7 +9,7 @@ use method::Handler;
 pub struct Router {
     get: HashMap<&'static str, Box<Handler>>,
     post: HashMap<&'static str, Box<Handler>>,
-    error: Option<Box<Handler>>,
+    error: HashMap<StatusCode, Box<Handler>>,
 }
 
 impl Router {
@@ -17,7 +17,7 @@ impl Router {
         Router {
             get: HashMap::new(),
             post: HashMap::new(),
-            error: None,
+            error: HashMap::new(),
         }
     }
 }
@@ -31,8 +31,8 @@ impl Router {
         self.post.insert(path, handler);
     }
 
-    pub fn set_error(&mut self, handler: Box<Handler>) {
-        self.error = Some(handler);
+    pub fn set_error(&mut self, code: StatusCode, handler: Box<Handler>) {
+        self.error.insert(code, handler);
     }
 }
 
@@ -44,7 +44,7 @@ impl Router {
                 ()
             })
             .or_else(|| {
-                if let Some(ref _err_handler) = self.error {
+                if let Some(ref _err_handler) = self.error.get(&StatusCode::NotFound) {
                     _err_handler(c);
                 } else {
                     c.error(StatusCode::NotFound, "404");

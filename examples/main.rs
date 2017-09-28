@@ -3,6 +3,7 @@ extern crate serde_derive;
 extern crate gin;
 
 use gin::context::Context;
+use gin::hyper::StatusCode;
 
 fn main() {
     gin::init();
@@ -10,7 +11,10 @@ fn main() {
     gin::get("/abc", Box::new(|c| {
         c.string("Hello");
     }));
-    gin::error(Box::new(error));
+    gin::error(StatusCode::NotFound, Box::new(error));
+    gin::error(StatusCode::NoContent, Box::new(|c| {
+        c.string(format!("url: {}, No Content!", c.req.uri().as_ref()));
+    }));
     gin::run("127.0.0.1:3333");
 }
 
