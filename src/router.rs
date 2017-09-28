@@ -9,11 +9,16 @@ use method::Handler;
 pub struct Router {
     get: HashMap<String, Box<Handler>>,
     post: HashMap<String, Box<Handler>>,
+    error: Option<Box<Handler>>,
 }
 
 impl Router {
     pub fn new() -> Self {
-        Router { get: HashMap::new(), post: HashMap::new() }
+        Router {
+            get: HashMap::new(),
+            post: HashMap::new(),
+            error: None,
+        }
     }
 }
 
@@ -25,6 +30,10 @@ impl Router {
     pub fn insert_post<P: Into<String>>(&mut self, path: P, handler: Box<Handler>) {
         self.post.insert(path.into(), handler);
     }
+
+    pub fn set_error(&mut self, handler: Box<Handler>) {
+        self.error = Some(handler);
+    }
 }
 
 impl Router {
@@ -35,7 +44,11 @@ impl Router {
                 ()
             })
             .or_else(|| {
-                c.error(StatusCode::NotFound, "404");
+                if let Some(ref _err_handler) = self.error {
+                    _err_handler(c);
+                } else {
+                    c.error(StatusCode::NotFound, "404");
+                }
                 Some(())
             })
             .ok_or(Error::new(ErrorKind::NotFound, "未知错误"))
@@ -51,7 +64,7 @@ impl Router {
             "POST" => {
                 self.handle(c, path, &self.post)
             }
-            _ => {Ok(())}
+            _ => { Ok(()) }
         }
     }
 }

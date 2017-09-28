@@ -13,7 +13,7 @@ pub mod method;
 mod param;
 mod router;
 
-pub use method::get;
+pub use method::{get, post, error};
 pub use hyper::StatusCode;
 
 use router::Router;

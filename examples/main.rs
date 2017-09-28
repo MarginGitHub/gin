@@ -10,6 +10,7 @@ fn main() {
     gin::get("/abc", Box::new(|c| {
         c.string("Hello");
     }));
+    gin::error(Box::new(error));
     gin::run("127.0.0.1:3333");
 }
 
@@ -27,4 +28,8 @@ fn index(c: &mut Context) {
     } else {
         c.string("无请求参数")
     }
+}
+
+fn error(c: &mut Context) {
+    c.string(format!("error: {}", c.req.uri().as_ref()));
 }

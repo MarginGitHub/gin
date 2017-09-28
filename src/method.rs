@@ -17,3 +17,11 @@ pub fn post(_path: &str, _handler: Box<Handler>) {
         }
     }
 }
+
+pub fn error(_handler: Box<Handler>) {
+    unsafe {
+        if let Some(_router) = ::ROUTER.as_mut() {
+            _router.set_error(_handler);
+        }
+    }
+}
