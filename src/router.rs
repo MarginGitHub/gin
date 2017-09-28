@@ -7,8 +7,8 @@ use context::Context;
 use method::Handler;
 
 pub struct Router {
-    get: HashMap<String, Box<Handler>>,
-    post: HashMap<String, Box<Handler>>,
+    get: HashMap<&'static str, Box<Handler>>,
+    post: HashMap<&'static str, Box<Handler>>,
     error: Option<Box<Handler>>,
 }
 
@@ -23,12 +23,12 @@ impl Router {
 }
 
 impl Router {
-    pub fn insert_get<P: Into<String>>(&mut self, path: P, handler: Box<Handler>) {
-        self.get.insert(path.into(), handler);
+    pub fn insert_get(&mut self, path: &'static str, handler: Box<Handler>) {
+        self.get.insert(path, handler);
     }
 
-    pub fn insert_post<P: Into<String>>(&mut self, path: P, handler: Box<Handler>) {
-        self.post.insert(path.into(), handler);
+    pub fn insert_post(&mut self, path: &'static str, handler: Box<Handler>) {
+        self.post.insert(path, handler);
     }
 
     pub fn set_error(&mut self, handler: Box<Handler>) {
@@ -37,7 +37,7 @@ impl Router {
 }
 
 impl Router {
-    fn handle(&self, c: &mut Context, path: &str, r: &HashMap<String, Box<Handler>>) -> Result<()> {
+    fn handle(&self, c: &mut Context, path: &str, r: &HashMap<&'static str, Box<Handler>>) -> Result<()> {
         r.get(path)
             .map(|_handler| {
                 _handler(c);
