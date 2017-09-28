@@ -13,7 +13,7 @@ impl<'p> Params<'p> {
         let mut ret = Params::new();
         let ss = s.split("&");
         for _s in ss {
-            let mut item = _s.split(":");
+            let mut item = _s.split("=");
             if let (Some(_key), Some(_value)) = (item.next(), item.next()) {
                 ret.put(_key, _value);
             }
