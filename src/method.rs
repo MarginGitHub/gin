@@ -10,3 +10,10 @@ pub fn get(_path: &str, _handler: Box<Handler>) {
         }
     }
 }
+pub fn post(_path: &str, _handler: Box<Handler>) {
+    unsafe {
+        if let Some(_router) = ::ROUTER.as_mut() {
+            _router.insert_post(_path, _handler);
+        }
+    }
+}
