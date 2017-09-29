@@ -1,4 +1,6 @@
 use std::mem::replace;
+use std::path::Path;
+use std::collections::HashMap;
 
 use hyper::server::{Request, Response};
 use hyper::StatusCode;
@@ -8,18 +10,30 @@ use serde::Serialize;
 use serde_json::to_string;
 
 use param::Params;
+use html::HTML;
+use url::Url;
 
 #[derive(Debug)]
 pub struct Context<'r> {
     pub req: &'r Request,
     resp: Option<Response>,
-    params: Option<Params<'r>>,
+    url: Url<'r>,
+    pub patterns: HashMap<&'r str, &'r str>,
 }
 
 impl<'r> Context<'r> {
     #[inline]
     pub fn new(req: &'r Request) -> Self {
-        Context { req, resp: None, params: None }
+        Context {
+            req,
+            resp: None,
+            url: Url::from(req.uri()),
+            patterns: HashMap::new(),
+        }
+    }
+
+    pub fn url(&self) -> &Url {
+        &self.url
     }
 
     pub fn response(self) -> Option<Response> {
@@ -29,16 +43,9 @@ impl<'r> Context<'r> {
 
 
 impl<'r> Context<'r> {
-    pub fn init_query(&mut self) {
-        let _ = self.req.uri().query().map(|_query| {
-            let params = Params::from(_query);
-            self.params = Some(params);
-            ()
-        });
-    }
 
     pub fn get_all_query(&self) -> Option<&Params> {
-        self.params.as_ref()
+        self.url.querys()
     }
 
     pub fn get_query(&self, key: &'r str) -> Option<&str> {
@@ -51,8 +58,8 @@ impl<'r> Context<'r> {
     }
 
     pub fn get_query_array(&self, key: &'r str) -> Option<&[&str]> {
-        match self.params {
-            Some(ref _params) => {
+        match self.get_all_query() {
+            Some(_params) => {
                 _params.get_array(key)
             },
             None => None
@@ -107,6 +114,30 @@ impl<'r> Context<'r> {
             .with_status(code)
             .with_headers(headers)
             .with_body(extra.into());
+        replace(unsafe {&mut *(&(self.resp) as *const _ as *mut Option<Response>)}, Some(resp));
+    }
+
+    pub fn html<P: AsRef<Path>>(&self, html: P) {
+        self.html_with_code(StatusCode::Ok, html);
+    }
+
+    pub fn html_with_code<P: AsRef<Path>>(&self, code: StatusCode, html: P) {
+        let mut headers = Headers::new();
+        headers.set_raw("content_type", "text/html");
+        let resp = Response::new()
+            .with_status(code)
+            .with_headers(headers)
+            .with_body(HTML::from(html));
+        replace(unsafe {&mut *(&(self.resp) as *const _ as *mut Option<Response>)}, Some(resp));
+    }
+
+    pub fn html_with_content<C: Into<String>>(&self, content: C) {
+        let mut headers = Headers::new();
+        headers.set_raw("content_type", "text/html");
+        let resp = Response::new()
+            .with_status(StatusCode::Ok)
+            .with_headers(headers)
+            .with_body(content.into());
         replace(unsafe {&mut *(&(self.resp) as *const _ as *mut Option<Response>)}, Some(resp));
     }
 }

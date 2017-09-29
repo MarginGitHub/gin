@@ -6,6 +6,7 @@ authors = ["dongjijin <1186073272@qq.com>"]
 [dependencies]
 futures = "0.1.14"
 futures-cpupool = "*"
+tokio-service = "0.1.0"
 hyper = "0.11.2"
 
 serde = "1.0.15"

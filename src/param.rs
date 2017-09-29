@@ -5,11 +5,8 @@ pub struct Params<'p> {
     inner: HashMap<&'p str, Vec<&'p str>>,
 }
 
-impl<'p> Params<'p> {
-    pub fn new() -> Self {
-        Params {inner: HashMap::new()}
-    }
-    pub fn from(s: &'p str) -> Self {
+impl<'p> From<&'p str> for Params<'p> {
+    fn from(s: &'p str) -> Self {
         let mut ret = Params::new();
         let ss = s.split("&");
         for _s in ss {
@@ -19,6 +16,12 @@ impl<'p> Params<'p> {
             }
         }
         ret
+    }
+}
+
+impl<'p> Params<'p> {
+    pub fn new() -> Self {
+        Params {inner: HashMap::new()}
     }
 
     pub fn put(&mut self, key: &'p str , value: &'p str) {
