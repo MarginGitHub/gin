@@ -5,7 +5,7 @@ use param::Params;
 #[derive(Debug)]
 pub struct Url<'r> {
     raw: &'r str,
-    segments: Segments<'r>,
+    segments: UrlSegments<'r>,
     querys: Option<Params<'r>>,
 }
 
@@ -17,7 +17,7 @@ impl<'r> From<&'r ::hyper::Uri> for Url<'r> {
         }
         Url {
             raw: url.as_ref(),
-            segments: Segments::from(url.path()),
+            segments: UrlSegments::from(url.path()),
             querys: querys,
         }
     }
@@ -28,7 +28,7 @@ impl<'r> Url<'r> {
         self.raw
     }
 
-    pub fn segments(&self) -> &Segments {
+    pub fn segments(&self) -> &UrlSegments {
         &self.segments
     }
 
@@ -39,20 +39,23 @@ impl<'r> Url<'r> {
 }
 
 #[derive(Debug)]
-pub struct Segments<'r> {
+pub struct UrlSegments<'r> {
     _inner: Vec<&'r str>,
 }
 
-impl<'r> From<&'r str> for Segments<'r> {
+impl<'r> From<&'r str> for UrlSegments<'r> {
     fn from(s: &'r str) -> Self {
-        let inner = s.split('/')
+        let mut _inner: Vec<&'r str> = s.split('/')
             .filter(|s| s.len() != 0 )
             .collect();
-        Segments{_inner: inner}
+        if _inner.len() == 0 && s.contains('/') {
+            _inner.push("/");
+        }
+        UrlSegments{_inner}
     }
 }
 
-impl<'r> Deref for Segments<'r> {
+impl<'r> Deref for UrlSegments<'r> {
     type Target = [&'r str];
 
     fn deref(&self) -> &Self::Target {

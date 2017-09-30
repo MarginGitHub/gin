@@ -21,10 +21,24 @@ fn main() {
         .get("/", |c| {
             c.html("assets/index.html");
         })
-        .get("/abc", |c| {
-            c.string("Hello, abc");
+        .get("/{name}", |c| {
+            let name = c.content("name").unwrap();
+            c.string(format!("name: {}", name));
         })
-        .get("/params", index)
+        .get("/{name}/{index}", |c| {
+            let name = c.content("name").unwrap();
+            let index = c.content("index").unwrap();
+            c.string(format!("name: {}, index: {}", name, index));
+        })
+        .get("/{name}/abc/{number: 123}", |c| {
+            let name = c.content("name").unwrap();
+            let number = c.content("number").unwrap();
+            c.string(format!("name: {}, number: {}", name, number));
+        })
+        .get("/hello/{path..}", |c| {
+            c.string(format!("{:#?}",c.path("path").unwrap()));
+        })
+//        .get("/params", index)
         .errors(StatusCode::NotFound, error)
         .bind("127.0.0.1:3333".parse().unwrap())
         .map_err(|err| {

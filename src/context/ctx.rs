@@ -1,6 +1,5 @@
 use std::mem::replace;
 use std::path::Path;
-use std::collections::HashMap;
 
 use hyper::server::{Request, Response};
 use hyper::StatusCode;
@@ -11,14 +10,16 @@ use serde_json::to_string;
 
 use param::Params;
 use html::HTML;
-use url::Url;
+use url::{Url, UrlSegments};
+use router::segment::*;
+use context::*;
 
 #[derive(Debug)]
 pub struct Context<'r> {
     pub req: &'r Request,
     resp: Option<Response>,
     url: Url<'r>,
-    pub patterns: HashMap<&'r str, &'r str>,
+    patterns: Option<ParamsPattern>,
 }
 
 impl<'r> Context<'r> {
@@ -28,7 +29,7 @@ impl<'r> Context<'r> {
             req,
             resp: None,
             url: Url::from(req.uri()),
-            patterns: HashMap::new(),
+            patterns: None,
         }
     }
 
@@ -38,6 +39,36 @@ impl<'r> Context<'r> {
 
     pub fn response(self) -> Option<Response> {
         self.resp
+    }
+
+    pub fn patterns(&self) -> Option<&ParamsPattern> {
+        self.patterns.as_ref()
+    }
+
+}
+
+impl<'r> Context<'r> {
+    pub fn parse_patterns(&self, url_segments: &UrlSegments, segments: &Segments) {
+        let patterns = ParamsPattern::from((url_segments, segments));
+        replace(unsafe {&mut *(&(self.patterns) as *const _ as *mut Option<ParamsPattern>)}, Some(patterns));
+    }
+
+    pub fn content(&self, key: &str) -> Option<&str> {
+        match self.patterns {
+            Some(ref _pattern) => {
+                _pattern.content(key)
+            },
+            None => None,
+        }
+    }
+
+    pub fn path(&self, key: &str) -> Option<&Path> {
+        match self.patterns {
+            Some(ref _pattern) => {
+                _pattern.path(key)
+            },
+            None => None,
+        }
     }
 }
 

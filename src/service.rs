@@ -17,10 +17,10 @@ impl Service for GinService {
     type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
 
     fn call(&self, req: Self::Request) -> Self::Future {
-        let mut c = Context::new(&req);
-        println!("{:#?}", c.url());
-        match self.0.dispatch(&mut c) {
-            Ok(_) => Box::new(future::ok(c.response().unwrap())),
+        let c = Context::new(&req);
+//        println!("{:#?}\n{:#?}", c.url(), c.patterns());
+        match self.0.dispatch(c) {
+            Ok(_resp) => Box::new(future::ok(_resp)),
             Err(err) => {
                 eprintln!("{}", err);
                 Box::new(future::err(Error::Method))
