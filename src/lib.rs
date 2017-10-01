@@ -5,7 +5,7 @@ extern crate tokio_service;
 pub extern crate hyper;
 
 extern crate serde;
-extern crate serde_json;
+extern crate serde_json as json;
 
 
 mod service;
@@ -14,6 +14,7 @@ mod router;
 mod context;
 mod html;
 mod url;
+pub mod http;
 
 use hyper::server::Http;
 use hyper::{Result, Server, StatusCode, Body};

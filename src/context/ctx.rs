@@ -6,7 +6,7 @@ use hyper::StatusCode;
 use hyper::Headers;
 
 use serde::Serialize;
-use serde_json::to_string;
+use json::to_string;
 
 use param::Params;
 use html::HTML;
